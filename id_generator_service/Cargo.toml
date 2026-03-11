@@ -1,0 +1,49 @@
+[package]
+name = "id_generator_service"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A distributed ID generation service supporting Snowflake, ULID, and NanoID algorithms"
+license = "MIT"
+
+[dependencies]
+# Web 框架
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "metrics"] }
+
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+
+# 错误处理
+thiserror = "1"
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 时间处理
+time = "0.3"
+
+# ULID 生成
+ulid = "1"
+
+# NanoID 生成
+nanoid = "0.4"
+
+# 配置管理
+config = "0.14"
+
+# 指标收集
+prometheus = "0.13"
+
+# 随机数生成
+rand = "0.8"
+
+# 同步原语
+parking_lot = "0.12"
+
+[dev-dependencies]
+reqwest = { version = "0.12", features = ["json"] }

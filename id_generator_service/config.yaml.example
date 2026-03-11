@@ -1,0 +1,21 @@
+# ID Generator Service 配置文件示例
+# 复制此文件为 config.yaml 并修改相应配置
+
+# 服务器配置
+server:
+  host: "0.0.0.0"    # 监听地址
+  port: 3000         # 监听端口
+
+# Snowflake 算法配置
+snowflake:
+  worker_id: 1           # 机器 ID (0-31)
+  datacenter_id: 1       # 机房 ID (0-31)
+
+# ULID 算法配置（当前无需特殊配置）
+ulid:
+  _placeholder: false
+
+# NanoID 算法配置
+nanoid:
+  length: 21                                     # ID 长度
+  alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"  # 字符集
