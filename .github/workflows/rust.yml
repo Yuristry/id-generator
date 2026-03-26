@@ -28,40 +28,40 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
   release:
-    name: Create Release
-    needs: check-and-test
-    # 仅在 push 到 master 时触发发布，避免 PR 也创建 Tag
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # 必须赋予写入权限才能创建 Tag 和 Release
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get Version
-        id: get_version
-        shell: bash
-        run: |
-          # 从 Cargo.toml 中提取版本号
-          VERSION=$(grep '^version =' ${{ env.WORKING_DIRECTORY }}/Cargo.toml | head -n1 | awk -F '"' '{print $2}')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          # 加上时间戳或 build 号防止 Tag 重复（可选）
-          echo "TAG_NAME=v$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Build Release Binary
-        run: cargo build --release
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.get_version.outputs.TAG_NAME }}
-          name: Release ${{ steps.get_version.outputs.TAG_NAME }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true # 自动根据 commit 生成变更日志
-          files: |
-            ${{ env.WORKING_DIRECTORY }}/target/release/id_generator_service
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      name: Release for ${{ matrix.os }}
+      needs: check-and-test
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      strategy:
+        matrix:
+          include:
+            - os: ubuntu-latest
+              artifact_name: id_generator_linux
+              asset_name: id_generator_service_linux
+            - os: windows-latest
+              artifact_name: id_generator_service.exe
+              asset_name: id_generator_service_windows.exe
+            - os: macos-latest
+              artifact_name: id_generator_service
+              asset_name: id_generator_service_macos
+  
+      runs-on: ${{ matrix.os }}
+      permissions:
+        contents: write
+  
+      steps:
+        - uses: actions/checkout@v4
+        - name: Install Rust
+          uses: dtolnay/rust-toolchain@stable
+  
+        - name: Build Release
+          run: cargo build --release
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+  
+        - name: Upload to Release
+          uses: softprops/action-gh-release@v2
+          with:
+            tag_name: v0.1.0 # 这里建议配合前面的自动获取版本逻辑
+            files: |
+              ${{ env.WORKING_DIRECTORY }}/target/release/${{ matrix.artifact_name }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
